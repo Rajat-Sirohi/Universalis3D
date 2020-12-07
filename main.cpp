@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     
     glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
     glEnable(GL_DEPTH_TEST);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe
     
     Universalis.Init();
     
