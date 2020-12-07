@@ -15,8 +15,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 800;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 900;
 
 Game Universalis(SCR_WIDTH, SCR_HEIGHT);
 
@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
     
     glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
     glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe
     
     Universalis.Init();
     
@@ -70,7 +71,7 @@ int main(int argc, char *argv[])
 	    
 	    Universalis.Update(deltaTime);
 	    
-	    glClearColor(0.78f, 0.64f, 0.78f, 1.0f);
+	    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	    Universalis.Render();
 	    

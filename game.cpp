@@ -1,11 +1,11 @@
 #include "game.h"
 #include "resource_manager.h"
-#include "sprite_renderer.h"
-#include "game_object.h"
+#include "terrain.h"
+#include "terrain_renderer.h"
 #include "camera.h"
 
-SpriteRenderer *Renderer;
-GameObject *Player;
+TerrainRenderer *TerrRenderer;
+Terrain *Terr;
 Camera *Cam;
 float lastX, lastY;
 bool firstMouse = true;
@@ -18,25 +18,27 @@ Game::Game(unsigned int width, unsigned int height)
 
 Game::~Game()
 {
-    delete Renderer;
-    delete Player;
+    delete TerrRenderer;
+    delete Terr;
     delete Cam;
 }
 
 void Game::Init()
 {
-    ResourceManager::LoadShader("shaders/sprite.vert", "shaders/sprite.frag", "sprite");
+    ResourceManager::LoadShader("shaders/terrain.vert", "shaders/terrain.frag", "terrain");
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)this->Width / (float)this->Height, 0.1f, 100.0f);
-    ResourceManager::GetShader("sprite").Use();
-    ResourceManager::GetShader("sprite").SetInteger("image", 0);
-    ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
-    Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
+    ResourceManager::GetShader("terrain").Use();
+    ResourceManager::GetShader("terrain").SetMatrix4("projection", projection);
+    TerrRenderer = new TerrainRenderer(ResourceManager::GetShader("terrain"));
     
-    Player = new GameObject(glm::vec3(0.0f), glm::vec3(1.0f),
-			    ResourceManager::LoadTexture("textures/buddy.jpg", true, "buddy"));
+    int k = 20;
+    Terr = new Terrain(k, k, k,
+		       glm::vec3(0.97f, 0.55f, 0.76f));
+    TerrRenderer->setupRenderData(Terr);
     
-    Cam = new Camera(glm::vec3(0.0f, 0.0f, 3.0f),
-		     glm::vec3(0.0f, 1.0f, 0.0f));
+    Cam = new Camera(glm::vec3(0.0f, 20.0f, 0.0f),
+		     glm::vec3(0.0f, 1.0f, 0.0f),
+		     45.0f, -60.0f);
     lastX = this->Width / 2.0f;
     lastY = this->Height / 2.0f;
 }
@@ -45,8 +47,8 @@ void Game::Update(float dt)
 {
     glm::mat4 projection = glm::perspective(glm::radians(Cam->Zoom), (float)this->Width / (float)this->Height, 0.1f, 100.0f);
     glm::mat4 view = Cam->GetViewMatrix();
-    ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
-    ResourceManager::GetShader("sprite").SetMatrix4("view", view);
+    ResourceManager::GetShader("terrain").SetMatrix4("projection", projection);
+    ResourceManager::GetShader("terrain").SetMatrix4("view", view);
 }
 
 void Game::ProcessInput(float dt)
@@ -98,5 +100,5 @@ void Game::ProcessMouseClick()
 
 void Game::Render()
 {
-    Player->Draw(*Renderer);
+    TerrRenderer->DrawTerrain(Terr);
 }
