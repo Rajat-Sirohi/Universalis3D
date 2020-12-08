@@ -1,15 +1,15 @@
 #include "game.h"
 #include "resource_manager.h"
+#include "game_object.h"
 #include "terrain.h"
-#include "terrain_renderer.h"
 #include "camera.h"
 
-TerrainRenderer *TerrRenderer;
+GameObject *Player;
+
 Terrain *Terr;
-float terrFactor = 20.0f;
+int terrSize = 100;
 
 Camera *Cam;
-float camHeight = 1.0f;
 float lastX, lastY;
 bool firstMouse = true;
 
@@ -21,60 +21,74 @@ Game::Game(unsigned int width, unsigned int height)
 
 Game::~Game()
 {
-    delete TerrRenderer;
     delete Terr;
     delete Cam;
 }
 
 void Game::Init()
 {
-    ResourceManager::LoadShader("shaders/terrain.vert", "shaders/terrain.frag", "terrain");
+    ResourceManager::LoadShader("shaders/generic.vert", "shaders/generic.frag", "generic");
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)this->Width / this->Height, 0.1f, 100.0f);
-    ResourceManager::GetShader("terrain").Use();
-    ResourceManager::GetShader("terrain").SetInteger("image", 0);
-    ResourceManager::GetShader("terrain").SetMatrix4("projection", projection);
-    TerrRenderer = new TerrainRenderer(ResourceManager::GetShader("terrain"));
+    ResourceManager::GetShader("generic").Use();
+    ResourceManager::GetShader("generic").SetInteger("image", 0);
+    ResourceManager::GetShader("generic").SetMatrix4("projection", projection);
     
-    Terr = new Terrain(terrFactor, terrFactor, terrFactor,
-		       ResourceManager::LoadTexture("textures/rocks.jpg", true, "ground"));
-    TerrRenderer->setupRenderData(Terr);
+    Player = new GameObject(ResourceManager::LoadTexture("textures/buddy.jpg", true, "player"),
+			    glm::vec3(terrSize/2.0, 2, terrSize/2.0));
+
+    Terr = new Terrain(terrSize, ResourceManager::LoadTexture("textures/rocks.jpg", true, "terrain"));
     
-    Cam = new Camera(glm::vec3(terrFactor/2.0, camHeight, terrFactor/2.0),
-		     glm::vec3(0.0f, 1.0f, 0.0f), 90.0f);
+    Cam = new Camera(glm::vec3(0), glm::vec3(0,1,0));
     lastX = this->Width / 2.0f;
     lastY = this->Height / 2.0f;
 }
 
 void Game::Update(float dt)
 {
+    Player->velocity.y -= 3 * dt;
+    Player->position += Player->velocity * dt;
+
+    if (Player->position.y < 0.5) {
+	Player->position.y = 0.5;
+	Player->velocity.y *= -0.7;
+    }
+
+    Player->rotations.clear();
+    Rotation vertical = { Cam->Pitch, Cam->Right };
+    Rotation horizontal = { Cam->Yaw, glm::vec3(0,1,0) };
+    Player->rotations.push_back(vertical);
+    Player->rotations.push_back(horizontal);
+    
+    Cam->Position = Player->position - 5.0f * Cam->Front;
+
     glm::mat4 projection = glm::perspective(glm::radians(Cam->Zoom), (float)this->Width / (float)this->Height, 0.1f, 100.0f);
     glm::mat4 view = Cam->GetViewMatrix();
-    ResourceManager::GetShader("terrain").SetMatrix4("projection", projection);
-    ResourceManager::GetShader("terrain").SetMatrix4("view", view);
-
-    // Ground collision
-    if (Cam->Position.y < camHeight)
-	Cam->Position.y = camHeight;
+    ResourceManager::GetShader("generic").SetMatrix4("projection", projection);
+    ResourceManager::GetShader("generic").SetMatrix4("view", view);
 }
 
 void Game::ProcessInput(float dt)
 {
-    if (this->Keys[GLFW_KEY_W])
-	Cam->ProcessKeyboard(FORWARD, dt);
-    if (this->Keys[GLFW_KEY_S])
-	Cam->ProcessKeyboard(BACKWARD, dt);
-    if (this->Keys[GLFW_KEY_A])
-	Cam->ProcessKeyboard(LEFT, dt);
-    if (this->Keys[GLFW_KEY_D])
-	Cam->ProcessKeyboard(RIGHT, dt);
+    float thrust = 10.0f;
+    
+    if (Keys[GLFW_KEY_LEFT_SHIFT])
+	Player->velocity *= 0.95;
+    if (Keys[GLFW_KEY_SPACE])
+	Player->velocity.y += thrust * dt;
+
+    if (Keys[GLFW_KEY_W])
+	Player->velocity += Cam->Front * thrust * dt;
+    if (Keys[GLFW_KEY_S])
+	Player->velocity -= Cam->Front * thrust * dt;
+    if (Keys[GLFW_KEY_A])
+	Player->velocity -= Cam->Right * thrust * dt;
+    if (Keys[GLFW_KEY_D])
+	Player->velocity += Cam->Right * thrust * dt;
 }
 
 void Game::ProcessKeyPress(int key)
 {
-    if (key == GLFW_KEY_LEFT_SHIFT)
-	Cam->MovementSpeed *= 0.8f;
-    if (key == GLFW_KEY_SPACE)
-	Cam->MovementSpeed *= 1.2f;
+    
 }
 
 void Game::ProcessMouseMovement()
@@ -88,7 +102,7 @@ void Game::ProcessMouseMovement()
 	firstMouse = false;
     }
     
-    float xoffset = xpos - lastX;
+    float xoffset = lastX - xpos;
     float yoffset = lastY - ypos;
     
     lastX = xpos;
@@ -109,5 +123,6 @@ void Game::ProcessMouseClick()
 
 void Game::Render()
 {
-    TerrRenderer->DrawTerrain(Terr);
+    Player->Draw(ResourceManager::GetShader("generic"));
+    Terr->Draw(ResourceManager::GetShader("generic"));
 }
