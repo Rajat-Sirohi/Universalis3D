@@ -7,7 +7,7 @@
 #include <SOIL/SOIL.h>
 
 std::map<std::string, Shader> ResourceManager::Shaders;
-std::map<std::string, Texture2D> ResourceManager::Textures;
+std::map<std::string, Texture> ResourceManager::Textures;
 
 Shader ResourceManager::LoadShader(const char *vShaderFile, const char *fShaderFile, std::string name)
 {
@@ -20,13 +20,14 @@ Shader ResourceManager::GetShader(std::string name)
     return Shaders[name];
 }
 
-Texture2D ResourceManager::LoadTexture(const GLchar *file, GLboolean alpha, std::string name)
+Texture ResourceManager::LoadTexture(const GLchar *file, GLboolean alpha, std::string name)
 {
-    Textures[name] = loadTextureFromFile(file, alpha);
+    if (Textures.count(name) == 0)
+	Textures[name] = loadTextureFromFile(file, alpha);
     return Textures[name];
 }
 
-Texture2D ResourceManager::GetTexture(std::string name)
+Texture ResourceManager::GetTexture(std::string name)
 {
     return Textures[name];
 }
@@ -70,9 +71,9 @@ Shader ResourceManager::loadShaderFromFile(const char *vShaderFile, const char *
     return shader;
 }
 
-Texture2D ResourceManager::loadTextureFromFile(const GLchar *file, GLboolean alpha)
+Texture ResourceManager::loadTextureFromFile(const GLchar *file, GLboolean alpha)
 {
-    Texture2D texture;
+    Texture texture;
     if (alpha)
 	{
 	    texture.Internal_Format = GL_RGBA;

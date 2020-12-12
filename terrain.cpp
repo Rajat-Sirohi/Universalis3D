@@ -1,14 +1,14 @@
 #include "terrain.h"
 #include "resource_manager.h"
+using namespace std;
 
-Terrain::Terrain(int size, Texture2D texture, glm::vec3 position)
+Terrain::Terrain(int size, vector<Texture> textures, glm::vec3 position)
 {
     this->size = size;
-    this->texture = texture;
+    this->textures = textures;
     this->position = position;
     
     mesh = generateMesh();
-    mesh->setupRenderData();
 }
 
 void Terrain::Draw(Shader shader)
@@ -22,10 +22,11 @@ void Terrain::Draw(Shader shader)
 
 Mesh *Terrain::generateMesh()
 {
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
+    vector<Vertex> vertices;
+    vector<unsigned int> indices;
     
-    int width = size, depth = size;
+    int width, depth;
+    width = depth = size*2;
     for (int z = 0; z < depth; z++) {
 	for (int x = 0; x < width; x++) {
 	    // Position (uniformly distributed from 0 to width by 0 to depth)
@@ -60,5 +61,5 @@ Mesh *Terrain::generateMesh()
 	}
     }
     
-    return new Mesh(vertices, indices, texture);
+    return new Mesh(vertices, indices, textures);
 }

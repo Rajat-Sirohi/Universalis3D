@@ -1,6 +1,6 @@
 CC = g++
-CFLAGS = -g -Wall -lOpenGL -lGLU -lglfw -lglad -lSOIL -lfreeimage
-OBJ = main.o game.o resource_manager.o game_object.o terrain.o mesh.o shader.o texture.o camera.o
+CFLAGS = -g -Wall -lOpenGL -lGLU -lglfw -lglad -lSOIL -lfreeimage -lassimp
+OBJ = main.o game.o resource_manager.o game_object.o terrain.o model.o mesh.o shader.o texture.o camera.o
 
 universalis: $(OBJ)
 	$(CC) $(CFLAGS) -o universalis $(OBJ)
@@ -15,6 +15,8 @@ game_object.o: game_object.cpp game_object.h
 	$(CC) -g -c game_object.cpp
 terrain.o: terrain.cpp terrain.h
 	$(CC) -g -c terrain.cpp
+model.o: model.cpp model.h
+	$(CC) -g -c model.cpp
 mesh.o: mesh.cpp mesh.h
 	$(CC) -g -c mesh.cpp
 shader.o: shader.cpp shader.h

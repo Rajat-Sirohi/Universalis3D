@@ -1,10 +1,13 @@
 #include "mesh.h"
+using namespace std;
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Texture2D texture)
+Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
 {
     this->vertices = vertices;
     this->indices = indices;
-    this->texture = texture;
+    this->textures = textures;
+    
+    this->setupRenderData();
 }
 
 Mesh::~Mesh()
@@ -15,10 +18,17 @@ Mesh::~Mesh()
 void Mesh::Draw(Shader shader)
 {
     shader.Use();
-
-    glActiveTexture(GL_TEXTURE0);
-    texture.Bind();
     
+    unsigned int diffuseNr = 1;
+    for(unsigned int i = 0; i < textures.size(); i++) {
+	glActiveTexture(GL_TEXTURE0 + i);
+	string name = "texture_diffuse";
+	string number = std::to_string(diffuseNr++);
+	
+	glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+	textures[i].Bind();
+    }
+
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

@@ -14,9 +14,9 @@ class Terrain
 public:
     Mesh *mesh;
     int size;
-    Texture2D texture;
+    std::vector<Texture> textures;
     glm::vec3 position;
-    Terrain(int size, Texture2D texture, glm::vec3 position = glm::vec3(0.0f));
+    Terrain(int size, std::vector<Texture> textures, glm::vec3 position = glm::vec3(0.0f));
     void Draw(Shader shader);
 
 private:

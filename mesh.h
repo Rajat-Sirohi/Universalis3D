@@ -18,13 +18,15 @@ class Mesh
 public:
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    Texture2D texture;
+    std::vector<Texture> textures;
     unsigned int VAO;
     
     Mesh() { }
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Texture2D texture);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
     ~Mesh();
     void Draw(Shader shader);
+
+private:
     void setupRenderData();
 };
 

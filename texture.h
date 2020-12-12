@@ -3,7 +3,7 @@
 
 #include <glad/glad.h>
 
-class Texture2D
+class Texture
 {
 public:
     unsigned int ID;
@@ -14,7 +14,7 @@ public:
     unsigned int Wrap_T;
     unsigned int Filter_Min;
     unsigned int Filter_Max;
-    Texture2D();
+    Texture();
     void Generate(unsigned int width, unsigned int height, unsigned char* data);
     void Bind() const;
 };
